@@ -1,0 +1,39 @@
+name: Inspect vendor kernel image
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install inspection tools
+        run: sudo apt-get update && sudo apt-get install -y p7zip-full libarchive-tools util-linux
+      - name: Download pinned vendor archive
+        env:
+          ASSET_URL: https://github.com/itamarjp/alpine-orangepi-rv2/releases/download/kernel-6.6.63-ky/Orangepirv2_1.0.0_ubuntu_noble_server_linux6.6.63.7z
+          ASSET_SHA256: edc1d18e83e9cb509eb12dbab162555269b8255f64636a33e0ca8fcd33d865af
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 -o vendor.7z "$ASSET_URL"
+          echo "$ASSET_SHA256  vendor.7z" | sha256sum -c -
+      - name: Inspect archive structure
+        run: |
+          set -euo pipefail
+          7z l vendor.7z | tee archive-list.txt
+          mkdir -p unpack
+          7z x -ounpack vendor.7z
+          find unpack -maxdepth 3 -type f -printf '%p %s bytes\n' | tee unpack-files.txt
+          find unpack -type f \( -name '*6.6.63*' -o -name '*.dtb' -o -name 'esos.elf' \) | head -100 | tee kernel-candidates.txt
+      - name: Upload inspection report
+        uses: actions/upload-artifact@v4
+        with:
+          name: vendor-image-inspection
+          path: |
+            archive-list.txt
+            unpack-files.txt
+            kernel-candidates.txt
+          retention-days: 7
