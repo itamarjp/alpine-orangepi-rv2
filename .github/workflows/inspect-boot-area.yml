@@ -76,7 +76,7 @@ jobs:
             strings -a -n 8 boot-area.bin | grep -Ei 'u-boot|spl|opensbi|risc-v|k1|ky|orangepi|bootcmd|bootargs' | head -100 || true
           } | tee boot-area-report.txt
       - name: Upload inspection report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rv2-boot-area-report
           path: boot-area-report.txt
