@@ -1,0 +1,83 @@
+name: Inspect Orange Pi RV2 boot area
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install tools
+        run: sudo apt-get update && sudo apt-get install -y p7zip-full util-linux binwalk
+      - name: Download verified vendor image
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 -o vendor.7z https://github.com/itamarjp/alpine-orangepi-rv2/releases/download/kernel-6.6.63-ky/Orangepirv2_1.0.0_ubuntu_noble_server_linux6.6.63.7z
+          echo "edc1d18e83e9cb509eb12dbab162555269b8255f64636a33e0ca8fcd33d865af  vendor.7z" | sha256sum -c -
+          mkdir -p unpack
+          7z x -ounpack vendor.7z
+      - name: Analyze reserved disk area without modifying it
+        run: |
+          set -euo pipefail
+          IMG="$(find unpack -type f -name '*.img' -print -quit)"
+          test -n "$IMG"
+          START="$(fdisk -l -o Start "$IMG" | awk '$1 ~ /^[0-9]+$/ {print $1; exit}')"
+          test -n "$START"
+          test "$START" -gt 0
+          SECTOR_SIZE="$(fdisk -l "$IMG" | sed -n 's/.*Sector size (logical\/physical): \([0-9]*\) bytes.*/\1/p' | head -1)"
+          test -n "$SECTOR_SIZE"
+          COUNT="$(( START * SECTOR_SIZE ))"
+          echo "Partition starts at byte $COUNT (sector $START, sector size $SECTOR_SIZE)"
+          dd if="$IMG" of=boot-area.bin bs=1M count=30 status=none
+          truncate -s "$COUNT" boot-area.bin
+          {
+            echo "# Reserved boot area"
+            echo "Image: $(basename "$IMG")"
+            echo "Partition start sector: $START"
+            echo "Logical sector size: $SECTOR_SIZE bytes"
+            echo "Reserved bytes: $COUNT"
+            echo "SHA256: $(sha256sum boot-area.bin)"
+            echo
+            echo "## Partition table"
+            fdisk -l "$IMG"
+            echo
+            echo "## File signatures"
+            file boot-area.bin
+            echo
+            echo "## Non-zero ranges (4 KiB blocks)"
+            python3 - <<'PY'
+          from pathlib import Path
+          data = Path("boot-area.bin").read_bytes()
+          block = 4096
+          ranges = []
+          start = prev = None
+          for offset in range(0, len(data), block):
+              if any(data[offset:offset + block]):
+                  if start is None:
+                      start = offset
+                  prev = min(offset + block, len(data))
+              elif start is not None:
+                  ranges.append((start, prev))
+                  start = prev = None
+          if start is not None:
+              ranges.append((start, prev))
+          for a, b in ranges:
+              print(f"0x{a:08x} - 0x{b:08x} ({b-a} bytes)")
+          print(f"Non-zero blocks: {sum(any(data[i:i+block]) for i in range(0,len(data),block))}")
+          PY
+            echo
+            echo "## Embedded signatures (binwalk)"
+            binwalk boot-area.bin || true
+            echo
+            echo "## Relevant boot strings (sample)"
+            strings -a -n 8 boot-area.bin | grep -Ei 'u-boot|spl|opensbi|risc-v|k1|ky|orangepi|bootcmd|bootargs' | head -100 || true
+          } | tee boot-area-report.txt
+      - name: Upload inspection report
+        uses: actions/upload-artifact@v4
+        with:
+          name: rv2-boot-area-report
+          path: boot-area-report.txt
+          retention-days: 14
