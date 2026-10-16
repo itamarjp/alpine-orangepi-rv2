@@ -1,6 +1,10 @@
 name: Build Alpine Orange Pi RV2 image
 
 on:
+  pull_request:
+    paths:
+      - 'scripts/build-image.sh'
+      - '.github/workflows/build-image.yml'
   workflow_dispatch:
 
 permissions:
