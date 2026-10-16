@@ -36,14 +36,5 @@ jobs:
           test -f dist/SHA256SUMS
           gh release create "$RELEASE_TAG" dist/alpine-orangepi-rv2-riscv64.img.xz dist/SHA256SUMS \
             --title "Orange Pi RV2 Alpine experimental $RELEASE_TAG" \
-            --notes "$(cat <<'EOF'
-Experimental Alpine riscv64 GPT image for the Orange Pi RV2.
-
-Boot path: manufacturer OpenSBI/U-Boot already in SPI flash, then extlinux/extlinux.conf. This image does not program SPI and does not use boot.scr.
-
-Not verified on hardware. Wi-Fi and Bluetooth are not functional.
-
-Default credentials are root/alpine. Change the password immediately. SSH root login is enabled.
-EOF
-)" \
+            --notes "Experimental Alpine riscv64 image for Orange Pi RV2. Requires manufacturer OpenSBI/U-Boot in SPI; the image does not flash SPI. Wi-Fi/Bluetooth unsupported. SSH root/alpine is enabled: change the default password immediately." \
             --prerelease --target "$GITHUB_SHA"

@@ -188,9 +188,6 @@ add_svc() {
 }
 
 if [ "$mode" = apk ]; then
-  printf "%s\n" \
-    "https://dl-cdn.alpinelinux.org/alpine/v3.24/main" \
-    "https://dl-cdn.alpinelinux.org/alpine/v3.24/community" > /etc/apk/repositories
   apk add --no-cache \
     alpine-base alpine-conf \
     kmod dbus util-linux chrony sysfsutils openssh ca-certificates \
@@ -263,7 +260,8 @@ assemble() {
   log "installing Alpine minirootfs and vendor kernel"
   tar -xpf "$rootfs_tar" -C "$MNT"
   copy_kernel_assets "$WORK/assets" "$MNT" "$KVER"
-  install_overlay
+  # Use the overlay repositories for apk before installing the full overlay.
+  install -Dm644 "$SCRIPT_DIR/rootfs/etc/apk/repositories" "$MNT/etc/apk/repositories"
   configure_fstab "$root_uuid" "$boot_uuid"
   cat >"$MNT/etc/alpine-orangepi-rv2" <<EOF
 kernel=$KVER
@@ -282,7 +280,6 @@ EOF
   log "installing and upgrading Alpine packages under qemu-user"
   run_chroot apk
   install_overlay
-  configure_fstab "$root_uuid" "$boot_uuid"
   log "patching mkinitfs and building initramfs"
   python3 "$SCRIPT_DIR/patch-mkinitfs.py" "$MNT"
   if ! run_chroot initramfs; then

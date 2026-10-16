@@ -38,11 +38,16 @@ grep -q 'PermitRootLogin yes' "$SCRIPT_DIR/rootfs/etc/ssh/sshd_config.d/10-rv2.c
 grep -q 'root/alpine' "$SCRIPT_DIR/rootfs/etc/motd"
 grep -q 'root/alpine' "$SCRIPT_DIR/rootfs/etc/issue"
 grep -q 'disk="/dev/${diskname}"' "$SCRIPT_DIR/rootfs/usr/local/sbin/rv2-grow-root"
-if grep -n 'case "\$disk"' "$SCRIPT_DIR/prepare-rv2-fixes.py" >/dev/null 2>&1; then
-  fail "prepare-rv2-fixes.py must not remain"
-fi
-[[ ! -f $SCRIPT_DIR/prepare-build.py ]]
-[[ ! -f $SCRIPT_DIR/prepare-rv2-fixes.py ]]
+
+log "apk repositories"
+repo_file=$SCRIPT_DIR/rootfs/etc/apk/repositories
+diff -u <(printf '%s\n' \
+  'https://dl-cdn.alpinelinux.org/alpine/v3.24/main' \
+  'https://dl-cdn.alpinelinux.org/alpine/v3.24/community' \
+  '# https://dl-cdn.alpinelinux.org/alpine/edge/testing') "$repo_file" \
+  || fail "expected Alpine v3.24 main and community only"
+grep -Fq 'rootfs/etc/apk/repositories' "$SCRIPT_DIR/build-image.sh" \
+  || fail "build must use the overlay repositories"
 
 log "mkinitfs patch"
 fake=$(mktemp -d)

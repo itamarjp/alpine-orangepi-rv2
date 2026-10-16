@@ -60,9 +60,9 @@ SSH allows password login as root (`PermitRootLogin yes`). `/etc/motd` and `/etc
 | Minirootfs | `alpine-minirootfs-3.24.2-riscv64.tar.gz` |
 | Minirootfs SHA256 | `57132e6e4f3a4ba9ffdf24e485513ce507e45471e7fd565aeed91c055cd63f7b` |
 | Minirootfs URL | `https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/riscv64/` |
-| Packages | Alpine **edge** `main` and `community` |
+| Packages | Alpine **v3.24** `main` and `community` |
 
-The wiki also lists `edge/testing`. This image leaves testing commented out in `/etc/apk/repositories`. Edge package versions move; the minirootfs tarball does not.
+`/etc/apk/repositories` lists only these stable repositories. Package versions within v3.24 still move; the minirootfs tarball does not.
 
 ## Kernel asset
 
@@ -120,12 +120,8 @@ A 3.3 V USB-UART adapter at **115200 8N1** on the board UART (`ttyS0`) is the pr
 - Wi-Fi and Bluetooth do not work, per the Alpine wiki.
 - Some kernels have framebuffer problems. The console line keeps both `ttyS0` and `tty1`; U-Boot tends to honor the right-most `console=`.
 - Manufacturer tools are not included.
-- Edge packages are not pinned beyond the minirootfs tarball.
+- Packages come from Alpine v3.24 main and community. Versions inside that release still move; the minirootfs tarball is pinned.
 - The published root partition is shrunk. The first-boot service grows it only for ext4 on `mmcblk`, `nvme`, or `sd` devices, and it refuses to grow partition 1.
-
-## Inspecting the vendor archive
-
-`inspect-kernel.yml`, `inspect-boot.yml`, and `inspect-boot-area.yml` are read-only diagnostics of the Ubuntu image. They can still print `boot.scr` and the reserved 30 MiB area. Those files explain the vendor disk. They are not the Alpine boot path.
 
 ## License
 
