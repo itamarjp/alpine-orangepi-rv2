@@ -188,12 +188,21 @@ add_svc() {
 }
 
 if [ "$mode" = apk ]; then
+  # Pin package sources to the same stable Alpine release as the minirootfs.
+  # Do not mix edge packages into a stable image.
+  printf "%s\n" \
+    "https://dl-cdn.alpinelinux.org/alpine/v3.24/main" \
+    "https://dl-cdn.alpinelinux.org/alpine/v3.24/community" > /etc/apk/repositories
+  if grep -Eq "/edge(/|$)" /etc/apk/repositories; then
+    echo "edge repository is not allowed" >&2
+    exit 1
+  fi
   apk update
   apk add --no-cache \
     alpine-base alpine-baselayout alpine-conf alpine-keys alpine-release alpine-baselayout-data \
     kmod openrc dbus util-linux blkid chrony sysfsutils ssl_client openssh ca-certificates \
     ca-certificates-bundle ethtool e2fsprogs e2fsprogs-extra libudev-zero libudev-zero-helper \
-    parted grep busybox-mdev-openrc procps-ng net-tools iproute2 coreutils doas sed gawk findutils bash \
+    parted grep busybox-mdev-openrc procps-ng iproute2 coreutils doas sed gawk findutils bash \
     shadow pciutils mkinitfs ifupdown-ng cloud-utils-growpart wireless-regdb
   # Refresh all packages shipped by the minirootfs and installed above.
   # Stay on the configured Alpine repositories; never switch release branches.
