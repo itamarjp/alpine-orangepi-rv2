@@ -43,7 +43,8 @@ log "apk repositories"
 repo_file=$SCRIPT_DIR/rootfs/etc/apk/repositories
 diff -u <(printf '%s\n' \
   'https://dl-cdn.alpinelinux.org/alpine/v3.24/main' \
-  'https://dl-cdn.alpinelinux.org/alpine/v3.24/community') "$repo_file" \
+  'https://dl-cdn.alpinelinux.org/alpine/v3.24/community' \
+  '# https://dl-cdn.alpinelinux.org/alpine/edge/testing') "$repo_file" \
   || fail "expected Alpine v3.24 main and community only"
 grep -Fq 'rootfs/etc/apk/repositories' "$SCRIPT_DIR/build-image.sh" \
   || fail "build must use the overlay repositories"
