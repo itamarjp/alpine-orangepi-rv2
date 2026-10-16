@@ -299,6 +299,7 @@ EOF
   [[ -f $MNT/boot/vmlinuz-$KVER ]] || die "vmlinuz missing on boot partition"
   [[ -f $MNT/boot/$DTB_REL ]] || die "DTB missing on boot partition"
   [[ -f $MNT/lib/firmware/esos.elf ]] || die "esos.elf missing from rootfs"
+  [[ -s $MNT/lib/firmware/LICENSE.spacemit_esos ]] || die "esos license missing from rootfs"
   [[ ! -e $MNT/boot/boot.scr ]] || die "boot.scr must not be the Alpine boot path"
   [[ ! -e $MNT/boot/orangepiEnv.txt ]] || die "orangepiEnv.txt must not be shipped"
   grep -q '^ttyS0::' "$MNT/etc/inittab"

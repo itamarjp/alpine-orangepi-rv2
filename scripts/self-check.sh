@@ -17,6 +17,11 @@ fail() {
   exit 1
 }
 
+log "firmware license"
+license=$SCRIPT_DIR/rootfs/lib/firmware/LICENSE.spacemit_esos
+[[ -s $license ]] || fail "missing LICENSE.spacemit_esos"
+grep -q 'only applies to "esos.elf"' "$license" || fail "unexpected esos license text"
+
 log "syntax"
 bash -n "$SCRIPT_DIR/build-image.sh"
 bash -n "$SCRIPT_DIR/image-lib.sh"

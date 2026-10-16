@@ -51,6 +51,7 @@ jobs:
           done
           notes="Experimental Alpine riscv64 image for Orange Pi RV2. Requires manufacturer OpenSBI/U-Boot in SPI; the image does not flash SPI. Wi-Fi/Bluetooth unsupported. SSH root/alpine is enabled: change the default password immediately."
           notes+=$'\nAutomated experimental build; this specific image has not been individually boot-tested on Orange Pi RV2 hardware.'
+          notes+=$'\nKernel 6.6.63-ky is GPL-2.0: https://github.com/orangepi-xunlong/linux-orangepi/commit/ae9e974d3e19f460b6397bfe8f0f1417a073ce05 (branch orange-pi-6.6-ky).'
           gh release create "$tag" \
             dist/alpine-orangepi-rv2-riscv64.img.xz dist/SHA256SUMS \
             --title "Orange Pi RV2 Alpine experimental ${tag}" \
