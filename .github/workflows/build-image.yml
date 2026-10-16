@@ -1,0 +1,33 @@
+name: Build Alpine Orange Pi RV2 image
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/build-image.sh'
+      - '.github/workflows/build-image.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install image build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full qemu-user-static binfmt-support xz-utils e2fsprogs util-linux curl
+      - name: Build experimental image
+        run: sudo env OUTPUT_DIR="$GITHUB_WORKSPACE/dist" bash scripts/build-image.sh
+      - name: Publish workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpine-orangepi-rv2-experimental
+          path: |
+            dist/*.img.xz
+            dist/SHA256SUMS
+          retention-days: 7
+          if-no-files-found: error
