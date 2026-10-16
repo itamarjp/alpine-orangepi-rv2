@@ -62,7 +62,7 @@ SSH allows password login as root (`PermitRootLogin yes`). `/etc/motd` and `/etc
 | Minirootfs URL | `https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/riscv64/` |
 | Packages | Alpine **v3.24** `main` and `community` |
 
-`/etc/apk/repositories` lists those two v3.24 lines. Testing stays commented out. Package versions within v3.24 still move; the minirootfs tarball does not.
+`/etc/apk/repositories` lists only these stable repositories. Package versions within v3.24 still move; the minirootfs tarball does not.
 
 ## Kernel asset
 
