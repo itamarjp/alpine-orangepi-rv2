@@ -5,7 +5,6 @@ from pathlib import Path
 path = Path("scripts/build-image.sh")
 source = path.read_text()
 replacements = {
-    'edc1d18e83e9cb509eb12dbab162555269b8255f64636a33e0ca8fcd33d865af': 'edc1d18e83e9cb509eb12dbab162555269b8255f64636a33d865af',
     'ROOTFS_BASE="https://dl-cdn.alpinelinux.org/alpine/edge/releases/riscv64"': 'ROOTFS_BASE="https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/riscv64"',
     'curl -fsSL "$ROOTFS_BASE/" -o "$WORK/index.html"': ': # Version pinned below',
     '''ROOTFS_NAME="$(grep -oE 'alpine-minirootfs-[0-9][0-9.]*-riscv64.tar.gz' "$WORK/index.html" | sort -Vu | tail -1)"''': 'ROOTFS_NAME="alpine-minirootfs-3.24.2-riscv64.tar.gz"',
