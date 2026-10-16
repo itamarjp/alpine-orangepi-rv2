@@ -278,8 +278,11 @@ EOF
   run_chroot apk
   install_overlay
   if [[ $ROOT_PASSWORD != alpine ]]; then
-    sed -i 's|^WARNING: Public default credentials root/alpine; change password immediately\.$|WARNING: Custom root password configured at build time; keep it private.|' \
-      "$MNT/etc/issue" "$MNT/etc/motd"
+    for file in "$MNT/etc/issue" "$MNT/etc/motd"; do
+      grep -Fxq 'WARNING: Public default credentials root/alpine; change password immediately.' "$file" \
+        || die "default credential warning missing in $file"
+      sed -i 's|^WARNING: Public default credentials root/alpine; change password immediately\.$|WARNING: Custom root password configured at build time; keep it private.|' "$file"
+    done
   fi
   log "patching mkinitfs and building initramfs"
   python3 "$SCRIPT_DIR/patch-mkinitfs.py" "$MNT"
