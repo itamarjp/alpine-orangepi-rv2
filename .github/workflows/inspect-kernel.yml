@@ -28,6 +28,7 @@ jobs:
           IMG="$(find unpack -type f -name '*.img' -print -quit)"
           test -n "$IMG"
           {
+            echo "# Vendor archive inspection. Alpine consumes vmlinuz, dtb, modules and esos.elf, then boots with extlinux."
             echo "## Disk layout"
             file "$IMG"
             fdisk -l "$IMG"

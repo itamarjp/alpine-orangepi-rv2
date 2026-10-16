@@ -5,9 +5,7 @@ on:
     branches: [main]
   pull_request:
     paths:
-      - 'scripts/build-image.sh'
-      - 'scripts/prepare-build.py'
-      - 'scripts/prepare-rv2-fixes.py'
+      - 'scripts/**'
       - '.github/workflows/build-image.yml'
   workflow_dispatch:
 
@@ -15,20 +13,30 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  self-check:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install layout-check dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y parted gdisk e2fsprogs util-linux python3 cpio shellcheck
+      - name: Check extlinux image logic
+        run: sudo bash scripts/self-check.sh
+
+  build:
+    needs: self-check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - name: Install image build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y p7zip-full qemu-user-static binfmt-support xz-utils e2fsprogs util-linux fdisk curl
-      - name: Apply Alpine 3.24.2 build fixes
-        run: |
-          python3 scripts/prepare-build.py
-          python3 scripts/prepare-rv2-fixes.py
-      - name: Build experimental image
+          sudo apt-get install -y p7zip-full qemu-user-static binfmt-support xz-utils \
+            e2fsprogs util-linux fdisk parted gdisk curl python3 cpio
+      - name: Build experimental GPT image
         run: sudo env OUTPUT_DIR="$GITHUB_WORKSPACE/dist" bash scripts/build-image.sh
       - name: Publish workflow artifact
         uses: actions/upload-artifact@v4

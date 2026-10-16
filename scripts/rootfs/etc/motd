@@ -1,0 +1,6 @@
+Orange Pi RV2 experimental Alpine image
+WARNING: Public default credentials root/alpine; change password immediately.
+
+This image boots only when manufacturer OpenSBI and U-Boot are already in SPI flash.
+It does not program SPI. U-Boot must load /extlinux/extlinux.conf.
+Wi-Fi and Bluetooth are not functional. This image has not been verified on hardware.

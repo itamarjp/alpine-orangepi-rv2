@@ -1,0 +1,14 @@
+#!/sbin/openrc-run
+description="Expand the Alpine root partition to fill the disk"
+
+depend() {
+	need localmount
+	before sshd
+	after localmount
+}
+
+start() {
+	ebegin "Expanding root filesystem"
+	/usr/local/sbin/rv2-grow-root
+	eend $?
+}
