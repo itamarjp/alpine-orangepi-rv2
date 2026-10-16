@@ -1,4 +1,2 @@
 https://dl-cdn.alpinelinux.org/alpine/v3.24/main
 https://dl-cdn.alpinelinux.org/alpine/v3.24/community
-# Testing stays disabled unless a package is only published there.
-# https://dl-cdn.alpinelinux.org/alpine/v3.24/testing
