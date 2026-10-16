@@ -21,9 +21,9 @@ VENDOR_SHA256=${VENDOR_SHA256:-edc1d18e83e9cb509eb12dbab162555269b8255f64636a33e
 ROOTFS_NAME=${ROOTFS_NAME:-alpine-minirootfs-3.24.2-riscv64.tar.gz}
 ROOTFS_URL=${ROOTFS_URL:-https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/riscv64/${ROOTFS_NAME}}
 ROOTFS_SHA256=${ROOTFS_SHA256:-57132e6e4f3a4ba9ffdf24e485513ce507e45471e7fd565aeed91c055cd63f7b}
-BOOT_MIB=${BOOT_MIB:-512}
+BOOT_MIB=${BOOT_MIB:-128}
 ROOT_INITIAL_MIB=${ROOT_INITIAL_MIB:-2048}
-ROOT_SLACK_MIB=${ROOT_SLACK_MIB:-256}
+ROOT_SLACK_MIB=${ROOT_SLACK_MIB:-128}
 ROOT_PASSWORD=${ROOT_PASSWORD:-alpine}
 OUT=${OUTPUT_DIR:-$PWD/dist}
 IMG_NAME=alpine-orangepi-rv2-riscv64.img
@@ -188,13 +188,16 @@ add_svc() {
 }
 
 if [ "$mode" = apk ]; then
-  apk update
+  printf "%s\n" \
+    "https://dl-cdn.alpinelinux.org/alpine/v3.24/main" \
+    "https://dl-cdn.alpinelinux.org/alpine/v3.24/community" > /etc/apk/repositories
   apk add --no-cache \
-    alpine-base alpine-baselayout alpine-conf alpine-keys alpine-release alpine-baselayout-data \
-    kmod openrc dbus util-linux blkid chrony sysfsutils ssl_client openssh ca-certificates \
-    ca-certificates-bundle ethtool e2fsprogs e2fsprogs-extra libudev-zero libudev-zero-helper \
-    parted grep busybox-mdev-openrc procps-ng net-tools coreutils doas sed gawk findutils bash \
+    alpine-base alpine-conf \
+    kmod dbus util-linux chrony sysfsutils openssh ca-certificates \
+    ethtool e2fsprogs e2fsprogs-extra libudev-zero libudev-zero-helper \
+    parted grep busybox-mdev-openrc procps-ng iproute2 coreutils doas sed gawk findutils bash \
     shadow pciutils mkinitfs ifupdown-ng cloud-utils-growpart wireless-regdb
+  apk upgrade --no-cache
   exit 0
 fi
 
@@ -276,7 +279,7 @@ EOF
   mkdir -p "$MNT/dev/pts"
   mount --bind /dev/pts "$MNT/dev/pts"
 
-  log "installing Alpine edge packages under qemu-user"
+  log "installing and upgrading Alpine packages under qemu-user"
   run_chroot apk
   install_overlay
   configure_fstab "$root_uuid" "$boot_uuid"
