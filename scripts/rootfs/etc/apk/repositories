@@ -1,0 +1,5 @@
+https://dl-cdn.alpinelinux.org/alpine/edge/main
+https://dl-cdn.alpinelinux.org/alpine/edge/community
+# The Alpine wiki also lists edge/testing. Leave it disabled unless a package
+# is only published there.
+# https://dl-cdn.alpinelinux.org/alpine/edge/testing

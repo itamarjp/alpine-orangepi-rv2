@@ -34,6 +34,7 @@ jobs:
           dd if="$IMG" of=boot-area.bin bs=1M count=30 status=none
           truncate -s "$COUNT" boot-area.bin
           {
+            echo "# Vendor Ubuntu reserved area only. The Alpine GPT image does not embed SPL/U-Boot and does not program SPI."
             echo "# Reserved boot area"
             echo "Image: $(basename "$IMG")"
             echo "Partition start sector: $START"

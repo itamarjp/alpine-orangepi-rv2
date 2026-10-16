@@ -29,6 +29,8 @@ jobs:
           trap 'sudo umount root 2>/dev/null || true; sudo losetup -d "$LOOP" || true' EXIT
           sudo mount -o ro "${LOOP}p1" root
           {
+            echo '# Vendor Ubuntu image only. The Alpine image boots via SPI U-Boot + extlinux/extlinux.conf.'
+            echo '# boot.scr, orangepiEnv.txt and uInitrd below are not the Alpine boot path.'
             echo '## boot.cmd'
             sudo cat root/boot/boot.cmd || true
             echo '## orangepi boot.cmd'

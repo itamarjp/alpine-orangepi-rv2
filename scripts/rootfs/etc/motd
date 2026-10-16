@@ -1,0 +1,8 @@
+Orange Pi RV2 — experimental Alpine Linux (riscv64)
+
+This image boots only when manufacturer OpenSBI and U-Boot are already in SPI flash.
+It does not program SPI. U-Boot must load /extlinux/extlinux.conf.
+
+Serial console: root / rv2-changeme
+SSH root login is disabled. Change the root password before exposing the board.
+Wi-Fi and Bluetooth are not functional. This image has not been verified on hardware.

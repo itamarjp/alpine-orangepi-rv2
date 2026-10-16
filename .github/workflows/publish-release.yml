@@ -14,17 +14,17 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
-      - name: Install dependencies
+      - name: Install image build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y p7zip-full qemu-user-static binfmt-support xz-utils e2fsprogs util-linux curl
-      - name: Apply Alpine 3.24.2 preparation when available
-        run: |
-          if test -f scripts/prepare-build.py; then python3 scripts/prepare-build.py; fi
-      - name: Build image
+          sudo apt-get install -y p7zip-full qemu-user-static binfmt-support xz-utils \
+            e2fsprogs util-linux fdisk parted gdisk curl python3 cpio shellcheck
+      - name: Check extlinux image logic
+        run: sudo bash scripts/self-check.sh
+      - name: Build experimental GPT image
         run: sudo env OUTPUT_DIR="$GITHUB_WORKSPACE/dist" bash scripts/build-image.sh
       - name: Publish direct xz assets
         env:
@@ -36,5 +36,14 @@ jobs:
           test -f dist/SHA256SUMS
           gh release create "$RELEASE_TAG" dist/alpine-orangepi-rv2-riscv64.img.xz dist/SHA256SUMS \
             --title "Orange Pi RV2 Alpine experimental $RELEASE_TAG" \
-            --notes "Experimental Alpine riscv64 image. Not yet verified to boot on physical hardware. Default SSH root password must be changed immediately." \
+            --notes "$(cat <<'EOF'
+Experimental Alpine riscv64 GPT image for the Orange Pi RV2.
+
+Boot path: manufacturer OpenSBI/U-Boot already in SPI flash, then extlinux/extlinux.conf. This image does not program SPI and does not use boot.scr.
+
+Not verified on hardware. Wi-Fi and Bluetooth are not functional.
+
+Serial console: root / rv2-changeme. Change it immediately. SSH root login is disabled.
+EOF
+)" \
             --prerelease --target "$GITHUB_SHA"

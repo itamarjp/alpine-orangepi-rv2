@@ -1,0 +1,63 @@
+#!/bin/sh
+# Expand the last Alpine root partition to fill the disk, then grow ext4.
+# disk must be assigned from diskname. An earlier builder checked unset $disk.
+set -eu
+
+marker=${RV2_GROW_MARKER:-/var/lib/rv2-root-expanded}
+if [ -e "$marker" ]; then
+  exit 0
+fi
+
+rootdev=$(findmnt -n -o SOURCE /)
+rootdev=$(readlink -f "$rootdev")
+partno=$(lsblk -n -o PARTN "$rootdev" | head -n 1 | tr -d '[:space:]')
+diskname=$(lsblk -n -o PKNAME "$rootdev" | head -n 1 | tr -d '[:space:]')
+if [ -z "$partno" ] || [ -z "$diskname" ]; then
+  echo "Cannot identify root partition" >&2
+  exit 1
+fi
+disk="/dev/${diskname}"
+
+case "$rootdev" in
+  /dev/mmcblk[0-9]*p[0-9]* | /dev/nvme[0-9]*n[0-9]*p[0-9]* | /dev/sd[a-z][0-9]*)
+    ;;
+  *)
+    echo "Refusing to resize root: $rootdev" >&2
+    exit 1
+    ;;
+esac
+case "$disk" in
+  /dev/mmcblk[0-9]* | /dev/nvme[0-9]*n[0-9]* | /dev/sd[a-z])
+    ;;
+  *)
+    echo "Refusing to resize disk: $disk" >&2
+    exit 1
+    ;;
+esac
+if [ "$partno" = 1 ]; then
+  echo "Refusing to grow partition 1 (boot)" >&2
+  exit 1
+fi
+fstype=$(findmnt -n -o FSTYPE /)
+if [ "$fstype" != ext4 ]; then
+  echo "Root filesystem is not ext4" >&2
+  exit 1
+fi
+
+if ! out=$(growpart "$disk" "$partno" 2>&1); then
+  printf '%s\n' "$out" >&2
+  case "$out" in
+    *NOCHANGE* | *"no space"*)
+      echo "Root partition already fills the disk"
+      ;;
+    *)
+      exit 1
+      ;;
+  esac
+else
+  printf '%s\n' "$out"
+fi
+
+resize2fs "$rootdev"
+mkdir -p "$(dirname "$marker")"
+touch "$marker"
