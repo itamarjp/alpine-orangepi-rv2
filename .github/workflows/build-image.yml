@@ -8,6 +8,8 @@ on:
       - 'scripts/**'
       - '.github/workflows/build-image.yml'
   workflow_dispatch:
+  schedule:
+    - cron: '0 6 1 * *'
 
 permissions:
   contents: read
@@ -47,3 +49,64 @@ jobs:
             dist/SHA256SUMS
           retention-days: 7
           if-no-files-found: error
+
+  release:
+    needs: build
+    if: success() && github.ref == 'refs/heads/main' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: alpine-orangepi-rv2-experimental
+          path: dist
+      - name: Publish dated prerelease
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          imgs=(dist/*.img.xz)
+          if [ "${#imgs[@]}" -eq 0 ] || [ ! -f dist/SHA256SUMS ]; then
+            echo "expected dist/*.img.xz and dist/SHA256SUMS" >&2
+            find dist -maxdepth 3 -type f -print >&2 || true
+            exit 1
+          fi
+
+          base="$(date -u +%Y.%m.%d)"
+          existing="$(gh api --paginate "/repos/${GITHUB_REPOSITORY}/git/matching-refs/tags/${base}" --jq '.[].ref')"
+
+          has_tag() {
+            local name="$1"
+            local ref
+            while IFS= read -r ref; do
+              if [ "$ref" = "refs/tags/${name}" ]; then
+                return 0
+              fi
+            done <<< "$existing"
+            return 1
+          }
+
+          # The bare UTC date is the first release that day. The next free tag is -2, -3, ...
+          tag="$base"
+          if has_tag "$tag"; then
+            n=2
+            while has_tag "${base}-${n}"; do
+              n=$((n + 1))
+              if [ "$n" -gt 50 ]; then
+                echo "no free release tag for ${base}" >&2
+                exit 1
+              fi
+            done
+            tag="${base}-${n}"
+          fi
+
+          echo "Creating prerelease ${tag} for ${GITHUB_SHA}"
+          gh release create "$tag" "${imgs[@]}" dist/SHA256SUMS \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --generate-notes
