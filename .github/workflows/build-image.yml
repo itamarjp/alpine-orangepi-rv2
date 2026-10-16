@@ -7,12 +7,25 @@ on:
     paths:
       - 'scripts/**'
       - '.github/workflows/build-image.yml'
+      - '.github/workflows/publish-release.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+  actionlint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint workflows
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) 1.7.12
+          ./actionlint -shellcheck "$(command -v shellcheck)"
+
   self-check:
     runs-on: ubuntu-24.04
     timeout-minutes: 20

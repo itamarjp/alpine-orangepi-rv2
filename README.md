@@ -82,11 +82,11 @@ lib/modules/6.6.63-ky/
 lib/firmware/esos.elf
 ```
 
-Confirm that redistributing the kernel and `esos.elf` is acceptable before publishing a release. Wi-Fi and Bluetooth firmware from the vendor image is not copied. The wiki says Wi-Fi and Bluetooth do not work.
+Wi-Fi and Bluetooth firmware from the vendor image is not copied. The wiki says Wi-Fi and Bluetooth do not work.
 
 ## Build
 
-GitHub Actions (`.github/workflows/build-image.yml`) runs `scripts/self-check.sh`, then `scripts/build-image.sh`, on `ubuntu-24.04`. The publish workflow (`.github/workflows/publish-release.yml`) runs that same path and uploads `alpine-orangepi-rv2-riscv64.img.xz` and `SHA256SUMS`.
+GitHub Actions (`.github/workflows/build-image.yml`) runs `scripts/self-check.sh`, then `scripts/build-image.sh`, on `ubuntu-24.04`. Push and pull request runs keep the image as a 7-day workflow artifact.
 
 Locally, on Ubuntu 24.04:
 
@@ -100,6 +100,10 @@ sudo bash scripts/build-image.sh
 The image build runs Alpine's package tools inside a riscv64 chroot. The script registers the `qemu-riscv64` binfmt interpreter when it is not already enabled, because a single `qemu-riscv64-static` process does not reliably execute the later riscv binaries `apk` starts.
 
 `scripts/self-check.sh` does not download the vendor archive. It checks syntax, the mkinitfs patch, extlinux text, the first-boot grow script, GPT creation, and root shrinking.
+
+## Releases
+
+`.github/workflows/publish-release.yml` is the only publication path. It runs at 06:17 UTC on the 1st of each month, and when started with `workflow_dispatch` on `main`. The prerelease tag is `YYYY.MM.DD`, then `YYYY.MM.DD-2`, `-3`, and so on. Asset names stay `alpine-orangepi-rv2-riscv64.img.xz` and `SHA256SUMS`.
 
 ## Flash
 
@@ -123,6 +127,8 @@ A 3.3 V USB-UART adapter at **115200 8N1** on the board UART (`ttyS0`) is the pr
 - Packages come from Alpine v3.24 main and community. Versions inside that release still move; the minirootfs tarball is pinned.
 - The published root partition is shrunk. The first-boot service grows it only for ext4 on `mmcblk`, `nvme`, or `sd` devices, and it refuses to grow partition 1.
 
-## License
+## Licensing
 
-Licenses for Alpine packages, the Linux kernel, and vendor firmware remain those of their respective upstream projects. No blanket license is asserted for third-party binaries.
+`esos.elf` is SpacemiT firmware. Fedora [work item 652](https://gitlab.com/fedora/legal/fedora-license-data/-/work_items/652) closed spacemit-firmware as `license::allowed-firmware` (`LicenseRef-Fedora-Firmware`). The image installs that text at `/lib/firmware/LICENSE.spacemit_esos`.
+
+The `6.6.63-ky` kernel is GPL-2.0. The vendor Ubuntu archive was built by [orangepi-build `2fb7f9d`](https://github.com/orangepi-xunlong/orangepi-build/commit/2fb7f9d8a2d8869894b70bba045e53a3286e2b03), which uses [linux-orangepi](https://github.com/orangepi-xunlong/linux-orangepi) branch `orange-pi-6.6-ky` ([`ae9e974`](https://github.com/orangepi-xunlong/linux-orangepi/commit/ae9e974d3e19f460b6397bfe8f0f1417a073ce05), "Support Orange Pi RV2"). Alpine packages keep their own licenses.
