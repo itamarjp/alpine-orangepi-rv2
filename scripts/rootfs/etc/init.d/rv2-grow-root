@@ -4,7 +4,6 @@ description="Expand the Alpine root partition to fill the disk"
 depend() {
 	need localmount
 	before sshd
-	after localmount
 }
 
 start() {

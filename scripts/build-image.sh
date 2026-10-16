@@ -91,8 +91,6 @@ require_build_tools() {
   [[ -x /usr/libexec/qemu-binfmt/riscv64-binfmt-P || -x /usr/bin/qemu-riscv64-static ]] || die "install qemu-user-static"
   [[ $EUID -eq 0 ]] || die "run as root"
   ensure_riscv64_binfmt
-  grep -q "$ROOT_PASSWORD" "$SCRIPT_DIR/rootfs/etc/motd" || die "motd does not mention ROOT_PASSWORD"
-  grep -q "$ROOT_PASSWORD" "$SCRIPT_DIR/rootfs/etc/issue" || die "issue does not mention ROOT_PASSWORD"
 }
 
 prepare_vendor_image() {
@@ -157,7 +155,6 @@ prepare_rootfs_tarball() {
 }
 
 install_overlay() {
-  mkdir -p "$MNT/etc/network" "$MNT/etc/ssh/sshd_config.d" "$MNT/etc/init.d" "$MNT/usr/local/sbin" "$MNT/etc/apk"
   cp -a "$SCRIPT_DIR/rootfs/." "$MNT/"
   chmod 755 "$MNT/usr/local/sbin/rv2-grow-root" "$MNT/etc/init.d/rv2-grow-root"
 }
@@ -280,6 +277,13 @@ EOF
   log "installing and upgrading Alpine packages under qemu-user"
   run_chroot apk
   install_overlay
+  if [[ $ROOT_PASSWORD != alpine ]]; then
+    for file in "$MNT/etc/issue" "$MNT/etc/motd"; do
+      grep -Fxq 'WARNING: Public default credentials root/alpine; change password immediately.' "$file" \
+        || die "default credential warning missing in $file"
+      sed -i 's|^WARNING: Public default credentials root/alpine; change password immediately\.$|WARNING: Custom root password configured at build time; keep it private.|' "$file"
+    done
+  fi
   log "patching mkinitfs and building initramfs"
   python3 "$SCRIPT_DIR/patch-mkinitfs.py" "$MNT"
   if ! run_chroot initramfs; then
@@ -338,7 +342,7 @@ main() {
   )
   BUILD_OK=1
   log "built $OUT/$IMG_NAME.xz"
-  log "EXPERIMENTAL: SPI U-Boot must already be installed. Not verified on hardware."
+  log "EXPERIMENTAL: SPI U-Boot must already be installed; boot verified on Orange Pi RV2 hardware."
 }
 
 main "$@"
