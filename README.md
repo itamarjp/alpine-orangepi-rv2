@@ -2,7 +2,7 @@
 
 Experimental **riscv64** disk image for the Orange Pi RV2. The image is built from a pinned Alpine minirootfs plus the vendor **6.6.63-ky** kernel. It is a new GPT disk. It does not clone the Ubuntu image.
 
-> **Status:** Experimental. The boot path follows the [Alpine wiki](https://wiki.alpinelinux.org/wiki/Installing_Alpine_Linux_on_OrangePi_RV2) and has **not** been verified on a physical board.
+> **Status:** Experimental. The boot path follows the [Alpine wiki](https://wiki.alpinelinux.org/wiki/Installing_Alpine_Linux_on_OrangePi_RV2) and has been verified on an Orange Pi RV2. New builds still require validation.
 
 ## Boot model
 
@@ -22,8 +22,8 @@ Alpine's own kernels are not used. The wiki reports that they panic while mounti
 
 | Partition | Size | Filesystem | Role |
 | --- | --- | --- | --- |
-| 1 `boot` | 512 MiB | ext4 | `extlinux/extlinux.conf`, `vmlinuz-6.6.63-ky`, `initramfs-6.6.63-ky`, `dtb-6.6.63-ky/ky/x1_orangepi-rv2.dtb` |
-| 2 `root` | ext4, shrunk around the installed system plus 256 MiB | ext4 | Alpine root, modules, `/lib/firmware/esos.elf` |
+| 1 `boot` | 128 MiB | ext4 | `extlinux/extlinux.conf`, `vmlinuz-6.6.63-ky`, `initramfs-6.6.63-ky`, `dtb-6.6.63-ky/ky/x1_orangepi-rv2.dtb` |
+| 2 `root` | Shrunk ext4 filesystem plus 128 MiB of slack | ext4 | Alpine root, modules, `/lib/firmware/esos.elf` |
 
 `parted` marks partition 1 boot. On GPT that also sets the ESP type, which matches the wiki. The partition is still ext4.
 
@@ -42,7 +42,7 @@ The image ships with the same default as the previous experimental builds:
 - user: `root`
 - password: `alpine`
 
-SSH allows password login as root (`PermitRootLogin yes`). `/etc/motd` and `/etc/issue` warn that these are public default credentials and that the password must be changed immediately.
+SSH allows password login as root (`PermitRootLogin yes`). `/etc/motd` and `/etc/issue` warn about the public default password. Setting `ROOT_PASSWORD` when building overrides that password without displaying it in the login banners.
 
 ## What is configured
 
@@ -116,7 +116,7 @@ A 3.3 V USB-UART adapter at **115200 8N1** on the board UART (`ttyS0`) is the pr
 
 ## Known limits
 
-- Not verified on hardware.
+- Boot tested on Orange Pi RV2 hardware; each new image revision still needs testing.
 - Wi-Fi and Bluetooth do not work, per the Alpine wiki.
 - Some kernels have framebuffer problems. The console line keeps both `ttyS0` and `tty1`; U-Boot tends to honor the right-most `console=`.
 - Manufacturer tools are not included.
