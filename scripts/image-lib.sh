@@ -250,6 +250,11 @@ shrink_root_partition() {
   local loop rootdev blocks block_size slack_blocks target fs_bytes
   local start current_size new_sectors p1_before p1_after final_sectors
   loop=$(attach_loop "$img" rw)
+  for _ in {1..15}; do
+    [[ -b ${loop}p2 ]] && break
+    partx -u "$loop" >/dev/null 2>&1 || partx -av "$loop" >/dev/null 2>&1 || true
+    sleep 0.2
+  done
   [[ -b ${loop}p2 ]] || die "root partition node missing on $loop"
   rootdev=${loop}p2
   p1_before=$(sfdisk_part "$img" 1)
