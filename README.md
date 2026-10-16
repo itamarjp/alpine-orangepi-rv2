@@ -86,7 +86,7 @@ Confirm that redistributing the kernel and `esos.elf` is acceptable before publi
 
 ## Build
 
-GitHub Actions (`.github/workflows/build-image.yml`) runs `scripts/self-check.sh`, then `scripts/build-image.sh`, on `ubuntu-24.04`. Push and pull request runs upload `dist/*.img.xz` and `dist/SHA256SUMS` as a workflow artifact kept for 7 days.
+GitHub Actions (`.github/workflows/build-image.yml`) runs `scripts/self-check.sh`, then `scripts/build-image.sh`, on `ubuntu-24.04`. Push and pull request runs keep the image as a 7-day workflow artifact.
 
 Locally, on Ubuntu 24.04:
 
@@ -103,7 +103,7 @@ The image build runs Alpine's package tools inside a riscv64 chroot. The script 
 
 ## Releases
 
-On `main`, the build workflow publishes a GitHub prerelease after the image build when it runs on the monthly schedule (06:00 UTC on the 1st) or when it is started manually with `workflow_dispatch`. The tag is the UTC date `YYYY.MM.DD`. If that tag already exists, a `-N` suffix is added (for example `2026.10.16-2`). The release contains `dist/*.img.xz` and `dist/SHA256SUMS`. Push and pull request runs do not publish a release. `.github/workflows/publish-release.yml` can still upload those same files under a tag you choose.
+`.github/workflows/publish-release.yml` is the only publication path. It runs at 06:00 UTC on the 1st of each month, and when started with `workflow_dispatch` on `main`. The prerelease tag is `YYYY.MM.DD`, then `YYYY.MM.DD-2`, `-3`, and so on. Asset names stay `alpine-orangepi-rv2-riscv64.img.xz` and `SHA256SUMS`.
 
 ## Flash
 
