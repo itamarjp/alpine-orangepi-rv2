@@ -193,10 +193,6 @@ if [ "$mode" = apk ]; then
   printf "%s\n" \
     "https://dl-cdn.alpinelinux.org/alpine/v3.24/main" \
     "https://dl-cdn.alpinelinux.org/alpine/v3.24/community" > /etc/apk/repositories
-  if grep -Eq "/edge(/|$)" /etc/apk/repositories; then
-    echo "edge repository is not allowed" >&2
-    exit 1
-  fi
   apk update
   apk add --no-cache \
     alpine-base alpine-baselayout alpine-conf alpine-keys alpine-release alpine-baselayout-data \
