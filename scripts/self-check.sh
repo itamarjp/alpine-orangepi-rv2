@@ -34,8 +34,9 @@ if grep -nE 'orangepiEnv|uInitrd|boot\.scr' "$SCRIPT_DIR/build-image.sh" | grep 
 fi
 grep -q 'write_extlinux' "$SCRIPT_DIR/build-image.sh"
 grep -q 'mkinitfs-rv2' "$SCRIPT_DIR/build-image.sh"
-grep -q 'PermitRootLogin no' "$SCRIPT_DIR/rootfs/etc/ssh/sshd_config.d/10-rv2.conf"
-grep -q 'rv2-changeme' "$SCRIPT_DIR/rootfs/etc/motd"
+grep -q 'PermitRootLogin yes' "$SCRIPT_DIR/rootfs/etc/ssh/sshd_config.d/10-rv2.conf"
+grep -q 'root/alpine' "$SCRIPT_DIR/rootfs/etc/motd"
+grep -q 'root/alpine' "$SCRIPT_DIR/rootfs/etc/issue"
 grep -q 'disk="/dev/${diskname}"' "$SCRIPT_DIR/rootfs/usr/local/sbin/rv2-grow-root"
 if grep -n 'case "\$disk"' "$SCRIPT_DIR/prepare-rv2-fixes.py" >/dev/null 2>&1; then
   fail "prepare-rv2-fixes.py must not remain"

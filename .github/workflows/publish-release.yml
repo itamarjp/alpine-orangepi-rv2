@@ -43,7 +43,7 @@ Boot path: manufacturer OpenSBI/U-Boot already in SPI flash, then extlinux/extli
 
 Not verified on hardware. Wi-Fi and Bluetooth are not functional.
 
-Serial console: root / rv2-changeme. Change it immediately. SSH root login is disabled.
+Default credentials are root/alpine. Change the password immediately. SSH root login is enabled.
 EOF
 )" \
             --prerelease --target "$GITHUB_SHA"

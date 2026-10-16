@@ -37,14 +37,12 @@ plus the wiki `mtdparts=d420c000.spi-0:...` string. The root line is filled in a
 
 ## Credentials
 
-The serial console accepts a **temporary** root password so a new board can be reached without cloud-init:
+The image ships with the same default as the previous experimental builds:
 
 - user: `root`
-- password: `rv2-changeme`
+- password: `alpine`
 
-SSH allows password authentication, but **`PermitRootLogin no`**. Root SSH with that password is disabled. Log in on the serial console, change the root password, and add a normal user before exposing Ethernet.
-
-The same warning is in `/etc/motd` and `/etc/issue`.
+SSH allows password login as root (`PermitRootLogin yes`). `/etc/motd` and `/etc/issue` warn that these are public default credentials and that the password must be changed immediately.
 
 ## What is configured
 

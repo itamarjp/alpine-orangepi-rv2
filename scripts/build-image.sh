@@ -24,7 +24,7 @@ ROOTFS_SHA256=${ROOTFS_SHA256:-57132e6e4f3a4ba9ffdf24e485513ce507e45471e7fd565ae
 BOOT_MIB=${BOOT_MIB:-512}
 ROOT_INITIAL_MIB=${ROOT_INITIAL_MIB:-2048}
 ROOT_SLACK_MIB=${ROOT_SLACK_MIB:-256}
-ROOT_PASSWORD=${ROOT_PASSWORD:-rv2-changeme}
+ROOT_PASSWORD=${ROOT_PASSWORD:-alpine}
 OUT=${OUTPUT_DIR:-$PWD/dist}
 IMG_NAME=alpine-orangepi-rv2-riscv64.img
 
@@ -298,7 +298,7 @@ EOF
   [[ ! -e $MNT/boot/boot.scr ]] || die "boot.scr must not be the Alpine boot path"
   [[ ! -e $MNT/boot/orangepiEnv.txt ]] || die "orangepiEnv.txt must not be shipped"
   grep -q '^ttyS0::' "$MNT/etc/inittab"
-  grep -q 'PermitRootLogin no' "$MNT/etc/ssh/sshd_config.d/10-rv2.conf"
+  grep -q 'PermitRootLogin yes' "$MNT/etc/ssh/sshd_config.d/10-rv2.conf"
   grep -q "$root_uuid" "$MNT/etc/fstab"
   grep -q "$boot_uuid" "$MNT/etc/fstab"
 

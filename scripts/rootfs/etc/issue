@@ -1,4 +1,4 @@
-Orange Pi RV2 experimental Alpine Linux
-Serial login: root / rv2-changeme — change this password immediately.
-SSH root login is disabled. SPI U-Boot is not installed by this image.
+Orange Pi RV2 experimental Alpine image
+WARNING: Public default credentials root/alpine; change password immediately.
+SPI U-Boot is not installed by this image.
 
