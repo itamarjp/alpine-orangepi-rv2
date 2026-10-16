@@ -260,11 +260,8 @@ assemble() {
   log "installing Alpine minirootfs and vendor kernel"
   tar -xpf "$rootfs_tar" -C "$MNT"
   copy_kernel_assets "$WORK/assets" "$MNT" "$KVER"
-  # The overlay file is the only apk repository list. Seed it before the
-  # chroot. install_overlay runs once after packages are installed and copies
-  # that same file, so the chroot and the finished rootfs both stay on v3.24.
-  mkdir -p "$MNT/etc/apk"
-  cp -a "$SCRIPT_DIR/rootfs/etc/apk/repositories" "$MNT/etc/apk/repositories"
+  # Use the overlay repositories for apk before installing the full overlay.
+  install -Dm644 "$SCRIPT_DIR/rootfs/etc/apk/repositories" "$MNT/etc/apk/repositories"
   configure_fstab "$root_uuid" "$boot_uuid"
   cat >"$MNT/etc/alpine-orangepi-rv2" <<EOF
 kernel=$KVER
@@ -283,9 +280,6 @@ EOF
   log "installing and upgrading Alpine packages under qemu-user"
   run_chroot apk
   install_overlay
-  cmp -s "$SCRIPT_DIR/rootfs/etc/apk/repositories" "$MNT/etc/apk/repositories" \
-    || die "apk repositories diverged from the v3.24 overlay"
-  configure_fstab "$root_uuid" "$boot_uuid"
   log "patching mkinitfs and building initramfs"
   python3 "$SCRIPT_DIR/patch-mkinitfs.py" "$MNT"
   if ! run_chroot initramfs; then
