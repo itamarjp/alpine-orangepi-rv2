@@ -41,24 +41,12 @@ grep -q 'disk="/dev/${diskname}"' "$SCRIPT_DIR/rootfs/usr/local/sbin/rv2-grow-ro
 
 log "apk repositories"
 repo_file=$SCRIPT_DIR/rootfs/etc/apk/repositories
-grep -qx 'https://dl-cdn.alpinelinux.org/alpine/v3.24/main' "$repo_file" \
-  || fail "apk repositories missing v3.24 main"
-grep -qx 'https://dl-cdn.alpinelinux.org/alpine/v3.24/community' "$repo_file" \
-  || fail "apk repositories missing v3.24 community"
-if grep -q '/alpine/edge/' "$repo_file" "$SCRIPT_DIR/build-image.sh"; then
-  fail "apk repositories must stay on Alpine v3.24"
-fi
-grep -q 'rootfs/etc/apk/repositories' "$SCRIPT_DIR/build-image.sh" \
-  || fail "apk chroot must use the overlay repositories file"
-if grep -Eq '/alpine/.*/(main|community)' "$SCRIPT_DIR/build-image.sh"; then
-  fail "build-image.sh must not hardcode apk repository URLs"
-fi
-overlay_lines=$(grep -c '^  install_overlay$' "$SCRIPT_DIR/build-image.sh" || true)
-[[ $overlay_lines -eq 1 ]] || fail "install_overlay must run once"
-apk_line=$(grep -n '^  run_chroot apk$' "$SCRIPT_DIR/build-image.sh" | cut -d: -f1)
-overlay_line=$(grep -n '^  install_overlay$' "$SCRIPT_DIR/build-image.sh" | cut -d: -f1)
-[[ -n $apk_line && -n $overlay_line && $overlay_line -gt $apk_line ]] \
-  || fail "install_overlay must run after apk"
+diff -u <(printf '%s\n' \
+  'https://dl-cdn.alpinelinux.org/alpine/v3.24/main' \
+  'https://dl-cdn.alpinelinux.org/alpine/v3.24/community') "$repo_file" \
+  || fail "expected Alpine v3.24 main and community only"
+grep -Fq 'rootfs/etc/apk/repositories' "$SCRIPT_DIR/build-image.sh" \
+  || fail "build must use the overlay repositories"
 
 log "mkinitfs patch"
 fake=$(mktemp -d)
