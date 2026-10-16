@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'scripts/build-image.sh'
-      - 'scripts/prepare-build.py'
+      - 'scripts/prepare-build.py'\n      - 'scripts/prepare-rv2-fixes.py'
       - '.github/workflows/build-image.yml'
   workflow_dispatch:
 
@@ -20,9 +20,9 @@ jobs:
       - name: Install image build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y p7zip-full qemu-user-static binfmt-support xz-utils e2fsprogs util-linux curl
+          sudo apt-get install -y p7zip-full qemu-user-static binfmt-support xz-utils e2fsprogs util-linux fdisk curl
       - name: Apply Alpine 3.24.2 build fixes
-        run: python3 scripts/prepare-build.py
+        run: |\n          python3 scripts/prepare-build.py\n          python3 scripts/prepare-rv2-fixes.py
       - name: Build experimental image
         run: sudo env OUTPUT_DIR="$GITHUB_WORKSPACE/dist" bash scripts/build-image.sh
       - name: Publish workflow artifact
