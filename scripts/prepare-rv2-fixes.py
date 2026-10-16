@@ -49,7 +49,15 @@ rootdev=$(readlink -f "$rootdev")
 partno=$(lsblk -n -o PARTN "$rootdev" | head -1)
 diskname=$(lsblk -n -o PKNAME "$rootdev" | head -1)
 [ -n "$partno" ] && [ -n "$diskname" ] || { echo "Cannot identify root partition" >&2; exit 1; }
-disk="/dev/$diskname"
+case "$rootdev" in
+  /dev/mmcblk[0-9]*p[0-9]*) ;;
+  *) echo "Refusing to resize non-MMC root: $rootdev" >&2; exit 1 ;;
+esac
+case "$disk" in
+  /dev/mmcblk[0-9]*) ;;
+  *) echo "Refusing to resize non-MMC disk: $disk" >&2; exit 1 ;;
+esac
+[ "$(findmnt -n -o FSTYPE /)" = ext4 ] || { echo "Root filesystem is not ext4" >&2; exit 1; }
 growpart "$disk" "$partno"
 resize2fs "$rootdev"
 mkdir -p /var/lib
