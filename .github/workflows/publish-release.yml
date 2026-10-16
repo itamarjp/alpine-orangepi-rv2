@@ -3,7 +3,7 @@ name: Publish Alpine RV2 image
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 6 1 * *'
+    - cron: '17 6 1 * *'
 
 permissions:
   contents: write
@@ -19,6 +19,8 @@ jobs:
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Install image build dependencies
         run: |
           sudo apt-get update
@@ -33,18 +35,25 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          test -f dist/alpine-orangepi-rv2-riscv64.img.xz
-          test -f dist/SHA256SUMS
+          (cd dist && sha256sum -c SHA256SUMS)
           base="$(date -u +%Y.%m.%d)"
           tag="$base"
           n=2
-          while git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null; do
-            tag="${base}-${n}"
-            n=$((n + 1))
+          while :; do
+            if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null; then
+              tag="${base}-${n}"
+              n=$((n + 1))
+            else
+              status=$?
+              [ "$status" -eq 2 ] || exit "$status"
+              break
+            fi
           done
+          notes="Experimental Alpine riscv64 image for Orange Pi RV2. Requires manufacturer OpenSBI/U-Boot in SPI; the image does not flash SPI. Wi-Fi/Bluetooth unsupported. SSH root/alpine is enabled: change the default password immediately."
+          notes+=$'\nAutomated experimental build; this specific image has not been individually boot-tested on Orange Pi RV2 hardware.'
           gh release create "$tag" \
             dist/alpine-orangepi-rv2-riscv64.img.xz dist/SHA256SUMS \
             --title "Orange Pi RV2 Alpine experimental ${tag}" \
-            --notes "Experimental Alpine riscv64 image for Orange Pi RV2. Requires manufacturer OpenSBI/U-Boot in SPI; the image does not flash SPI. Wi-Fi/Bluetooth unsupported. SSH root/alpine is enabled: change the default password immediately." \
+            --notes "$notes" \
             --generate-notes \
             --prerelease --target "$GITHUB_SHA"

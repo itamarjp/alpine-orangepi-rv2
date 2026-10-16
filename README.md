@@ -103,7 +103,7 @@ The image build runs Alpine's package tools inside a riscv64 chroot. The script 
 
 ## Releases
 
-`.github/workflows/publish-release.yml` is the only publication path. It runs at 06:00 UTC on the 1st of each month, and when started with `workflow_dispatch` on `main`. The prerelease tag is `YYYY.MM.DD`, then `YYYY.MM.DD-2`, `-3`, and so on. Asset names stay `alpine-orangepi-rv2-riscv64.img.xz` and `SHA256SUMS`.
+`.github/workflows/publish-release.yml` is the only publication path. It runs at 06:17 UTC on the 1st of each month, and when started with `workflow_dispatch` on `main`. The prerelease tag is `YYYY.MM.DD`, then `YYYY.MM.DD-2`, `-3`, and so on. Asset names stay `alpine-orangepi-rv2-riscv64.img.xz` and `SHA256SUMS`.
 
 ## Flash
 
