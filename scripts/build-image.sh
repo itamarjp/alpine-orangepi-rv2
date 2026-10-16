@@ -193,8 +193,11 @@ if [ "$mode" = apk ]; then
     alpine-base alpine-baselayout alpine-conf alpine-keys alpine-release alpine-baselayout-data \
     kmod openrc dbus util-linux blkid chrony sysfsutils ssl_client openssh ca-certificates \
     ca-certificates-bundle ethtool e2fsprogs e2fsprogs-extra libudev-zero libudev-zero-helper \
-    parted grep busybox-mdev-openrc procps-ng net-tools coreutils doas sed gawk findutils bash \
+    parted grep busybox-mdev-openrc procps-ng net-tools iproute2 coreutils doas sed gawk findutils bash \
     shadow pciutils mkinitfs ifupdown-ng cloud-utils-growpart wireless-regdb
+  # Refresh all packages shipped by the minirootfs and installed above.
+  # Stay on the configured Alpine repositories; never switch release branches.
+  apk upgrade --no-cache
   exit 0
 fi
 
@@ -276,7 +279,7 @@ EOF
   mkdir -p "$MNT/dev/pts"
   mount --bind /dev/pts "$MNT/dev/pts"
 
-  log "installing Alpine edge packages under qemu-user"
+  log "installing and upgrading Alpine packages under qemu-user"
   run_chroot apk
   install_overlay
   configure_fstab "$root_uuid" "$boot_uuid"
