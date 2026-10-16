@@ -24,6 +24,7 @@ replace("rc-update add sshd default",
 replace("mkdir -p \"$WORK/mnt/etc/apk\" \"$WORK/mnt/etc/network\" \"$WORK/mnt/etc/ssh/sshd_config.d\"",
         """mkdir -p "$WORK/mnt/etc/apk" "$WORK/mnt/etc/network" "$WORK/mnt/etc/ssh/sshd_config.d"
 # Install one-shot root expansion service before entering the Alpine chroot.
+mkdir -p "$WORK/mnt/etc/init.d"
 cat > "$WORK/mnt/etc/init.d/rv2-grow-root" <<'GROW_SERVICE'
 #!/sbin/openrc-run
 description="Expand Orange Pi RV2 root partition on first boot"
