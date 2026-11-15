@@ -18,9 +18,9 @@ source "$SCRIPT_DIR/image-lib.sh"
 KVER=$KVER_DEFAULT
 VENDOR_URL=${VENDOR_URL:-https://github.com/itamarjp/alpine-orangepi-rv2/releases/download/kernel-6.6.63-ky/Orangepirv2_1.0.0_ubuntu_noble_server_linux6.6.63.7z}
 VENDOR_SHA256=${VENDOR_SHA256:-edc1d18e83e9cb509eb12dbab162555269b8255f64636a33e0ca8fcd33d865af}
-ROOTFS_NAME=${ROOTFS_NAME:-alpine-minirootfs-3.24.2-riscv64.tar.gz}
+ROOTFS_NAME=${ROOTFS_NAME:-alpine-minirootfs-3.24.4-riscv64.tar.gz}
 ROOTFS_URL=${ROOTFS_URL:-https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/riscv64/${ROOTFS_NAME}}
-ROOTFS_SHA256=${ROOTFS_SHA256:-57132e6e4f3a4ba9ffdf24e485513ce507e45471e7fd565aeed91c055cd63f7b}
+ROOTFS_SHA256=${ROOTFS_SHA256:-010683db6c73b3ad1c334fc8f93f64ae748ef67ae6d69e964929aeaf8517bff3}
 BOOT_MIB=${BOOT_MIB:-128}
 ROOT_INITIAL_MIB=${ROOT_INITIAL_MIB:-2048}
 ROOT_SLACK_MIB=${ROOT_SLACK_MIB:-128}

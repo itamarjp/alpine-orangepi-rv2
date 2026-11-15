@@ -57,8 +57,8 @@ SSH allows password login as root (`PermitRootLogin yes`). `/etc/motd` and `/etc
 
 | Piece | Pin |
 | --- | --- |
-| Minirootfs | `alpine-minirootfs-3.24.2-riscv64.tar.gz` |
-| Minirootfs SHA256 | `57132e6e4f3a4ba9ffdf24e485513ce507e45471e7fd565aeed91c055cd63f7b` |
+| Minirootfs | `alpine-minirootfs-3.24.4-riscv64.tar.gz` |
+| Minirootfs SHA256 | `010683db6c73b3ad1c334fc8f93f64ae748ef67ae6d69e964929aeaf8517bff3` |
 | Minirootfs URL | `https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/riscv64/` |
 | Packages | Alpine **v3.24** `main` and `community` |
 
